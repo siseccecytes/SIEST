@@ -1,0 +1,11 @@
+package com.mapa.mapa.repository;
+
+import com.mapa.mapa.entity.InfoEstatal;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+
+@Repository
+public interface InfoEstatalRepository extends JpaRepository<InfoEstatal, Long> {
+    Optional<InfoEstatal> findByColegio(String colegio);
+}

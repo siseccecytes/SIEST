@@ -1,0 +1,46 @@
+package com.mapa.mapa.service;
+
+import com.mapa.mapa.dto.EstadoDTO;
+import com.mapa.mapa.entity.Estado;
+import com.mapa.mapa.repository.EstadoRepository;
+import com.mapa.mapa.repository.PlantelRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class EstadoService {
+    private final EstadoRepository estadoRepository;
+    private final PlantelRepository plantelRepository;
+    
+    public List<EstadoDTO> getAllEstados() {
+        return estadoRepository.findAll().stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+    
+    public EstadoDTO getEstadoById(Long id) {
+        Estado estado = estadoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+        return convertToDTO(estado);
+    }
+    
+    public Estado createEstado(Estado estado) {
+        return estadoRepository.save(estado);
+    }
+    
+    private EstadoDTO convertToDTO(Estado estado) {
+        EstadoDTO dto = new EstadoDTO();
+        dto.setId(estado.getId());
+        dto.setNombre(estado.getNombre());
+        dto.setClave(estado.getClave());
+        dto.setLatitud(estado.getLatitud());
+        dto.setLongitud(estado.getLongitud());
+        dto.setPoblacion(estado.getPoblacion());
+        dto.setCapital(estado.getCapital());
+        dto.setTotalPlanteles(plantelRepository.findByMunicipioEstadoId(estado.getId()).size());
+        return dto;
+    }
+}

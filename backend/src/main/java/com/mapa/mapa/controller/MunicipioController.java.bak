@@ -1,0 +1,26 @@
+package com.mapa.mapa.controller;
+
+import com.mapa.mapa.entity.Municipio;
+import com.mapa.mapa.service.MunicipioService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/municipios")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class MunicipioController {
+    private final MunicipioService municipioService;
+    
+    @GetMapping("/estado/{estadoId}")
+    public ResponseEntity<List<Municipio>> getMunicipiosByEstado(@PathVariable Long estadoId) {
+        return ResponseEntity.ok(municipioService.getMunicipiosByEstado(estadoId));
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Municipio> getMunicipioById(@PathVariable Long id) {
+        return ResponseEntity.ok(municipioService.getMunicipioById(id));
+    }
+}
