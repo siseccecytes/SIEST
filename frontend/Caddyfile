@@ -1,0 +1,15 @@
+# El dominio se define con la variable SITE_ADDRESS (ver docker-compose).
+# En produccion: siest.qa.cecyte.edu.mx  ->  Caddy saca el certificado HTTPS solo.
+# En local puedes usar  :80  para probar sin certificado.
+{$SITE_ADDRESS:siest.qa.cecyte.edu.mx} {
+	encode gzip zstd
+
+	# Todo lo que empiece con /api/ va al backend de Spring Boot
+	@api path /api/*
+	reverse_proxy @api backend:8081
+
+	# El resto son archivos del frontend (React SPA)
+	root * /srv
+	try_files {path} /index.html
+	file_server
+}

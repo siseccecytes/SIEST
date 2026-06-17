@@ -1,0 +1,62 @@
+services:
+  # ---------- Base de datos MySQL ----------
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: indicadores_educativos
+    volumes:
+      - db_data:/var/lib/mysql
+      # El dump se ejecuta SOLO la primera vez que se crea la base de datos.
+      - ./dump-indicadores_educativos-202605271625.sql:/docker-entrypoint-initdb.d/01-dump.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ---------- Backend Spring Boot ----------
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/indicadores_educativos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://siest.qa.cecyte.edu.mx}
+      PDFS_ANEXOS: /data/anexos
+      PDFS_OFERTA: /data/oferta
+    volumes:
+      # Carpetas con los PDFs en el servidor (crealas con: mkdir -p pdfs/anexos pdfs/oferta)
+      - ./pdfs/anexos:/data/anexos
+      - ./pdfs/oferta:/data/oferta
+
+  # ---------- Frontend + proxy + HTTPS (Caddy) ----------
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /api
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-siest.qa.cecyte.edu.mx}
+    volumes:
+      # Guarda los certificados HTTPS para no re-emitirlos en cada reinicio.
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:
