@@ -7,6 +7,7 @@ import com.mapa.mapa.repository.MatriculaRepository;
 import com.mapa.mapa.repository.Matricula20252026Repository;
 import com.mapa.mapa.repository.MatriculaPorPlantelRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -22,16 +23,19 @@ public class MatriculaController {
     private final MatriculaPorPlantelRepository matriculaPorPlantelRepository;
 
     @GetMapping("/nacional")
+    @Cacheable("matricula-nacional")
     public ResponseEntity<List<Matricula>> getMatriculaNacional() {
         return ResponseEntity.ok(matriculaRepository.findAll());
     }
 
     @GetMapping("/nacional-2025-2026")
+    @Cacheable("matricula-nacional-2025-2026")
     public ResponseEntity<List<Matricula20252026>> getMatriculaNacional20252026() {
         return ResponseEntity.ok(matricula20252026Repository.findAll());
     }
 
     @GetMapping("/por-plantel")
+    @Cacheable(value = "matricula-por-plantel", key = "#colegio ?: 'todos'")
     public ResponseEntity<List<MatriculaPorPlantel>> getMatriculaPorPlantel(
             @RequestParam(required = false) String colegio) {
         if (colegio != null && !colegio.isBlank()) {

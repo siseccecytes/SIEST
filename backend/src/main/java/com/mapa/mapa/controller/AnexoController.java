@@ -3,6 +3,7 @@ package com.mapa.mapa.controller;
 import com.mapa.mapa.entity.Anexo;
 import com.mapa.mapa.repository.AnexoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.*;
@@ -14,8 +15,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
-
 @RestController
 @RequestMapping("/api/anexos")
 @RequiredArgsConstructor
@@ -25,7 +24,15 @@ public class AnexoController {
     @Value("${pdfs.anexos}")
     private String anexosDir;
 
-    // Mapeo colegio -> nombre exacto del archivo PDF
+    private final AnexoRepository anexoRepository;
+
+    /** Resuelve la ruta: si es absoluta la usa, si no la resuelve relativa al directorio de trabajo (donde se ejecuta el JAR). */
+    private Path resolverDir(String configurado) {
+        Path ruta = Paths.get(configurado);
+        if (ruta.isAbsolute()) return ruta;
+        return Paths.get(System.getProperty("user.dir")).resolve(configurado).normalize();
+    }
+
     private static final Map<String, String> PDF_MAP = Map.ofEntries(
         Map.entry("AGUASCALIENTES",      "AGUASCALIENTES_0160-26.pdf"),
         Map.entry("BAJA CALIFORNIA",     "BAJA CALIFORNIA_0163-26.pdf"),
@@ -59,8 +66,6 @@ public class AnexoController {
         Map.entry("ZACATECAS",           "32_ZACATECAS_0253-26.pdf")
     );
 
-    private final AnexoRepository anexoRepository;
-
     @GetMapping
     public ResponseEntity<List<Anexo>> getAnexos() {
         return ResponseEntity.ok(anexoRepository.findAll());
@@ -70,18 +75,16 @@ public class AnexoController {
     public ResponseEntity<Resource> getPdf(@PathVariable String colegio) {
         String filename = PDF_MAP.get(colegio.toUpperCase().trim());
         if (filename == null) {
-            // Intentar búsqueda parcial
             filename = PDF_MAP.entrySet().stream()
                 .filter(e -> colegio.toUpperCase().contains(e.getKey()) ||
                              e.getKey().contains(colegio.toUpperCase()))
                 .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(null);
+                .findFirst().orElse(null);
         }
         if (filename == null) return ResponseEntity.notFound().build();
 
         try {
-            Path dir = Paths.get(anexosDir);
+            Path dir      = resolverDir(anexosDir);
             Path filePath = dir.resolve(filename).normalize();
             if (!filePath.startsWith(dir)) return ResponseEntity.badRequest().build();
 

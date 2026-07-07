@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { mapaService } from '../services/api';
 
 const DocentesPorEstado = () => {
+  const navigate = useNavigate();
   const [datos, setDatos] = useState([]);
   const [estado, setEstado] = useState('');
   const [loading, setLoading] = useState(true);
@@ -13,11 +15,11 @@ const DocentesPorEstado = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const estados = [...new Set(datos.map(d => d.estado).filter(Boolean))].sort();
+  const estados = useMemo(() => [...new Set(datos.map(d => d.estado).filter(Boolean))].sort(), [datos]);
 
-  const datosFiltrados = estado
-    ? datos.filter(d => d.estado === estado)
-    : datos;
+  const datosFiltrados = useMemo(() =>
+    estado ? datos.filter(d => d.estado === estado) : datos
+  , [datos, estado]);
 
   if (loading) return <div className="loading">Cargando...</div>;
 
@@ -39,6 +41,8 @@ const DocentesPorEstado = () => {
           {estado && (
             <button className="tbl-clear-btn" onClick={() => setEstado('')}>✕ Limpiar</button>
           )}
+          <button className="grafica-link-btn" onClick={() => navigate('/graficas/docentes-estado')}>📊 Ver gráfica</button>
+          <button className="grafica-link-btn grafica-link-btn--secundario" onClick={() => navigate('/graficas/horas-docentes')}>⏱️ Horas</button>
         </div>
       </div>
 

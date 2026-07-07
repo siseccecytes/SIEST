@@ -1,23 +1,18 @@
 package com.mapa.mapa.controller;
 
 import com.mapa.mapa.dto.PlantelMapaDTO;
-import com.mapa.mapa.entity.DirectorioCecyte;
-import com.mapa.mapa.entity.DirectorioEmsad;
 import com.mapa.mapa.entity.Estado;
 import com.mapa.mapa.entity.InfoEstatal;
 import com.mapa.mapa.entity.InfoFederal;
 import com.mapa.mapa.entity.Plantel;
-import com.mapa.mapa.repository.DirectorioCecyteRepository;
-import com.mapa.mapa.repository.DirectorioEmsadRepository;
 import com.mapa.mapa.repository.InfoEstatalRepository;
 import com.mapa.mapa.repository.InfoFederalRepository;
 import com.mapa.mapa.repository.PlantelRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/mapa")
@@ -27,25 +22,15 @@ public class MapaController {
     
     private final InfoFederalRepository infoFederalRepository;
     private final InfoEstatalRepository infoEstatalRepository;
-    private final DirectorioCecyteRepository directorioCecyteRepository;
-    private final DirectorioEmsadRepository directorioEmsadRepository;
     private final PlantelRepository plantelRepository;
     
     @GetMapping("/estados")
+    @Cacheable("mapa-estados")
     public ResponseEntity<List<Estado>> getEstados() {
-        // Obtener estados únicos que tienen datos en info_estatal
-        List<InfoEstatal> estadosConDatos = infoEstatalRepository.findAll();
-        
-        List<Estado> estados = estadosConDatos.stream()
-                .map(info -> {
-                    String nombreEstado = info.getColegio();
-                    Estado estado = getEstadoCoordenadas(nombreEstado);
-                    return estado;
-                })
-                .filter(estado -> estado != null)
-                .distinct()
+        List<Estado> estados = infoEstatalRepository.findColegiosDistintos().stream()
+                .map(this::getEstadoCoordenadas)
+                .filter(e -> e != null)
                 .toList();
-        
         return ResponseEntity.ok(estados);
     }
     
@@ -89,11 +74,13 @@ public class MapaController {
     }
     
     @GetMapping("/info-federal")
+    @Cacheable("info-federal")
     public ResponseEntity<List<InfoFederal>> getInfoFederal() {
         return ResponseEntity.ok(infoFederalRepository.findAll());
     }
     
     @GetMapping("/info-estatal/{estado}")
+    @Cacheable(value = "info-estatal", key = "#estado.toUpperCase()")
     public ResponseEntity<InfoEstatal> getInfoEstatal(@PathVariable String estado) {
         return infoEstatalRepository.findByColegio(estado)
                 .map(ResponseEntity::ok)
@@ -101,68 +88,26 @@ public class MapaController {
     }
     
     @GetMapping("/planteles/{estado}")
+    @Cacheable(value = "mapa-planteles", key = "#estado.toUpperCase()")
     public ResponseEntity<List<PlantelMapaDTO>> getPlantelesByEstado(@PathVariable String estado) {
-        String estadoUpper = estado.toUpperCase();
-        
-        List<Plantel> planteles = plantelRepository.findAll().stream()
-                .filter(p -> p.getColegio() != null && p.getColegio().equalsIgnoreCase(estadoUpper))
-                .toList();
-        
-        // Coordenadas del centro del estado como fallback
-        Estado estadoInfo = getEstadoByNombre(estado);
-        
-        List<PlantelMapaDTO> resultado = new ArrayList<>();
-        
-        for (Plantel plantel : planteles) {
-            Double lat = null;
-            Double lon = null;
-            String direccion = null;
-            
-            // Buscar en directorio_cecyte
-            Optional<DirectorioCecyte> cecyte = directorioCecyteRepository.findByCct(plantel.getCct());
-            if (cecyte.isPresent() && cecyte.get().getLatitud() != null) {
-                lat = cecyte.get().getLatitud();
-                lon = cecyte.get().getLongitud();
-                direccion = cecyte.get().getDireccion();
-            } else {
-                // Buscar en directorio_emsad
-                Optional<DirectorioEmsad> emsad = directorioEmsadRepository.findByCct(plantel.getCct());
-                if (emsad.isPresent() && emsad.get().getLatitud() != null) {
-                    lat = emsad.get().getLatitud();
-                    lon = emsad.get().getLongitud();
-                    direccion = emsad.get().getDireccion();
-                }
-            }
-            
-            // Usar coordenadas del estado como fallback
-            if (lat == null && estadoInfo != null) {
-                lat = estadoInfo.getLatitud();
-                lon = estadoInfo.getLongitud();
-            }
-            
-            if (lat != null && lon != null) {
-                resultado.add(new PlantelMapaDTO(
-                    plantel.getId(),
-                    plantel.getColegio(),
-                    plantel.getCct(),
-                    plantel.getTipo(),
-                    plantel.getNombreDelPlantel(),
-                    plantel.getEficienciaTerminal(),
-                    plantel.getDesafiliacionEscolar(),
-                     plantel.getReprobacion(),
-                    plantel.getMatricula(),
-                    lat,
-                    lon,
-                    direccion
-                ));
-            }
-        }
-        
+        List<Object[]> rows = plantelRepository.findPlantelesByColegioWithCoordenadas(estado);
+
+        List<PlantelMapaDTO> resultado = rows.stream().map(r -> new PlantelMapaDTO(
+                ((Number) r[0]).longValue(),
+                (String) r[1],
+                (String) r[2],
+                (String) r[3],
+                (String) r[4],
+                r[5] != null ? ((Number) r[5]).doubleValue() : null,
+                r[6] != null ? ((Number) r[6]).doubleValue() : null,
+                r[7] != null ? ((Number) r[7]).doubleValue() : null,
+                r[8] != null ? ((Number) r[8]).intValue() : null,
+                r[9] != null ? ((Number) r[9]).doubleValue() : null,
+                r[10] != null ? ((Number) r[10]).doubleValue() : null,
+                (String) r[11]
+        )).toList();
+
         return ResponseEntity.ok(resultado);
-    }
-    
-    private Estado getEstadoByNombre(String nombre) {
-        return getEstadoCoordenadas(nombre);
     }
     
     @GetMapping("/plantel/{id}")

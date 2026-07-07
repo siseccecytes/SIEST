@@ -5,6 +5,7 @@ import com.mapa.mapa.entity.OfertaEducativaEstado;
 import com.mapa.mapa.repository.OfertaEducativaNacionalRepository;
 import com.mapa.mapa.repository.OfertaEducativaEstadoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -32,12 +33,21 @@ public class OfertaEducativaController {
     private final OfertaEducativaNacionalRepository nacionalRepository;
     private final OfertaEducativaEstadoRepository estadoRepository;
 
+    /** Resuelve la ruta: si es absoluta la usa, si no la resuelve relativa al directorio de trabajo (donde se ejecuta el JAR). */
+    private Path resolverDir(String configurado) {
+        Path ruta = Paths.get(configurado);
+        if (ruta.isAbsolute()) return ruta;
+        return Paths.get(System.getProperty("user.dir")).resolve(configurado).normalize();
+    }
+
     @GetMapping("/nacional")
+    @Cacheable("oferta-nacional")
     public ResponseEntity<List<OfertaEducativaNacional>> getNacional() {
         return ResponseEntity.ok(nacionalRepository.findAll());
     }
 
     @GetMapping("/por-plantel")
+    @Cacheable(value = "oferta-por-plantel", key = "#colegio ?: 'todos'")
     public ResponseEntity<List<OfertaEducativaEstado>> getPorPlantel(
             @RequestParam(required = false) String colegio) {
         if (colegio != null && !colegio.isBlank()) {
@@ -48,7 +58,7 @@ public class OfertaEducativaController {
 
     @GetMapping("/pdf")
     public ResponseEntity<Resource> getPdf(@RequestParam String carrera, @RequestParam String tipo) {
-        Path dir = Paths.get(pdfDir);
+        Path dir = resolverDir(pdfDir);
         String[] archivos = dir.toFile().list((d, name) -> name.endsWith(".pdf"));
         if (archivos == null) return ResponseEntity.notFound().build();
 

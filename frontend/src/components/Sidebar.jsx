@@ -4,6 +4,29 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const menus = [
   {
     icon: '📊',
+    label: 'Dashboard Indicadores',
+    items: [
+      { icon: '📊', label: 'Dashboard Nacional', ruta: '/dashboard/indicadores' },
+    ]
+  },
+  {
+    icon: '📉',
+    label: 'Gráficas',
+    items: [
+      { icon: '📊', label: 'Matrícula Comparativa',      ruta: '/graficas/matricula-nacional' },
+      { icon: '👥', label: 'Matrícula por Género',        ruta: '/graficas/matricula-genero' },
+      { icon: '📈', label: 'Eficiencia Terminal',         ruta: '/graficas/eficiencia-terminal' },
+      { icon: '⚠️', label: 'Reprobación y Desafiliación', ruta: '/graficas/reprobacion-desafiliacion' },
+      { icon: '👨🏫', label: 'Docentes por Estado',      ruta: '/graficas/docentes-estado' },
+      { icon: '⏱️', label: 'Horas Asignadas',            ruta: '/graficas/horas-docentes' },
+      { icon: '🏅', label: 'Ranking por Matrícula',    ruta: '/graficas/ranking-estados' },
+      { icon: '🏆', label: 'Top 10 Planteles',          ruta: '/graficas/top10-planteles' },
+      { icon: '📊', label: 'Matrícula por Plantel',       ruta: '/graficas/matricula-plantel' },
+      { icon: '📚', label: 'Oferta Educativa',           ruta: '/graficas/oferta-educativa' },
+    ]
+  },
+  {
+    icon: '📊',
     label: 'Estadísticas',
     items: [
       { icon: '🏫', label: 'Planteles',               ruta: '/estadisticas/planteles' },

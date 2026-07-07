@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { mapaService } from '../services/api';
 import { usePaginacion, Paginacion } from './Paginacion';
 
@@ -48,14 +48,14 @@ const OfertaEducativaPorPlantel = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const colegios = [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort();
-  const ccts     = [...new Set(datos.map(d => d.cct).filter(Boolean))].sort();
+  const colegios = useMemo(() => [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort(), [datos]);
+  const ccts     = useMemo(() => [...new Set(datos.map(d => d.cct).filter(Boolean))].sort(), [datos]);
 
-  const datosFiltrados = datos.filter(d => {
+  const datosFiltrados = useMemo(() => datos.filter(d => {
     const okColegio = !filtros.colegio || d.colegio === filtros.colegio;
     const okCct     = !filtros.cct     || d.cct?.toLowerCase().includes(filtros.cct.toLowerCase());
     return okColegio && okCct;
-  });
+  }), [datos, filtros]);
 
   const hayFiltro = filtros.colegio || filtros.cct;
   const limpiar = () => setFiltros({ colegio: '', cct: '' });

@@ -3,17 +3,41 @@ import { useNavigate } from 'react-router-dom';
 const menus = [
   {
     icon: '📊',
+    titulo: 'Dashboard Indicadores',
+    descripcion: 'Resumen ejecutivo nacional: matrícula, semestres, indicadores y docentes comparados entre ciclos',
+    submenus: [
+      { label: 'Ver Dashboard Nacional', ruta: '/dashboard/indicadores' },
+    ]
+  },
+  {
+    icon: '📊',
     titulo: 'Estadísticas',
     descripcion: 'Planteles, Matrícula, Indicadores y Docentes',
     submenus: [
-      { label: 'Directorio Planteles',     ruta: '/estadisticas/planteles' },
-      { label: 'Matrícula Nacional 2024-2025',  ruta: '/estadisticas/matricula-nacional' },
-      { label: 'Matrícula Nacional 2025-2026',  ruta: '/estadisticas/matricula-nacional-2025-2026' },
-      { label: 'Matrícula por Plantel',     ruta: '/estadisticas/matricula' },
-      { label: 'Indicadores Nacionales',    ruta: '/estadisticas/indicadores-nacionales' },
-      { label: 'Indicadores por Plantel',   ruta: '/estadisticas/indicadores' },
-      { label: 'Docentes por Estado',       ruta: '/estadisticas/docentes-estado' },
-      { label: 'Docentes por Plantel',      ruta: '/estadisticas/docentes' },
+      { label: 'Directorio Planteles',          ruta: '/estadisticas/planteles' },
+      { label: 'Matrícula Nacional 2024-2025',   ruta: '/estadisticas/matricula-nacional' },
+      { label: 'Matrícula Nacional 2025-2026',   ruta: '/estadisticas/matricula-nacional-2025-2026' },
+      { label: 'Matrícula por Plantel',          ruta: '/estadisticas/matricula' },
+      { label: 'Indicadores Nacionales',         ruta: '/estadisticas/indicadores-nacionales' },
+      { label: 'Indicadores por Plantel',        ruta: '/estadisticas/indicadores' },
+      { label: 'Docentes por Estado',            ruta: '/estadisticas/docentes-estado' },
+      { label: 'Docentes por Plantel',           ruta: '/estadisticas/docentes' },
+    ]
+  },
+  {
+    icon: '📉',
+    titulo: 'Gráficas',
+    descripcion: 'Comparativas y análisis visual entre ciclos escolares',
+    submenus: [
+      { label: 'Matrícula Comparativa',          ruta: '/graficas/matricula-nacional' },
+      { label: 'Matrícula por Género',           ruta: '/graficas/matricula-genero' },
+      { label: 'Ranking de Estados',             ruta: '/graficas/ranking-estados' },
+      { label: 'Eficiencia Terminal',            ruta: '/graficas/eficiencia-terminal' },
+      { label: 'Deserción y Aprobación',         ruta: '/graficas/reprobacion-desafiliacion' },
+      { label: 'Docentes por Estado',            ruta: '/graficas/docentes-estado' },
+      { label: 'Horas Asignadas',                ruta: '/graficas/horas-docentes' },
+      { label: 'Top 10 Planteles',               ruta: '/graficas/top10-planteles' },
+      { label: 'Oferta Educativa',               ruta: '/graficas/oferta-educativa' },
     ]
   },
   {
@@ -29,8 +53,8 @@ const menus = [
     titulo: 'Oferta Educativa',
     descripcion: 'Oferta por Estado y por Plantel',
     submenus: [
-      { label: 'Oferta Educativa Nacional',    ruta: '/oferta/estado' },
-      { label: 'Oferta Educativa por Plantel', ruta: '/oferta/plantel' },
+      { label: 'Oferta Educativa Nacional',      ruta: '/oferta/estado' },
+      { label: 'Oferta Educativa por Plantel',   ruta: '/oferta/plantel' },
     ]
   },
 ];

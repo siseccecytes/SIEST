@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { mapaService } from '../services/api';
 import { usePaginacion, Paginacion } from './Paginacion';
 
@@ -48,16 +48,16 @@ const IndicadoresPorPlantel = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const colegios = [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort();
-  const tipos    = [...new Set(datos.map(d => d.tipo).filter(Boolean))].sort();
-  const ccts     = [...new Set(datos.map(d => d.cct).filter(Boolean))].sort();
+  const colegios = useMemo(() => [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort(), [datos]);
+  const tipos    = useMemo(() => [...new Set(datos.map(d => d.tipo).filter(Boolean))].sort(), [datos]);
+  const ccts     = useMemo(() => [...new Set(datos.map(d => d.cct).filter(Boolean))].sort(), [datos]);
 
-  const datosFiltrados = datos.filter(d => {
+  const datosFiltrados = useMemo(() => datos.filter(d => {
     const okColegio = !filtros.colegio || d.colegio === filtros.colegio;
     const okTipo    = !filtros.tipo    || d.tipo === filtros.tipo;
     const okCct     = !filtros.cct     || d.cct?.toLowerCase().includes(filtros.cct.toLowerCase());
     return okColegio && okTipo && okCct;
-  });
+  }), [datos, filtros]);
 
   const hayFiltro = filtros.colegio || filtros.tipo || filtros.cct;
   const limpiar = () => setFiltros({ colegio: '', tipo: '', cct: '' });

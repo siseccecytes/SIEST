@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { mapaService } from '../services/api';
 import { usePaginacion, Paginacion } from './Paginacion';
 
@@ -48,24 +48,26 @@ const DocentesPorPlantel = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const colegios  = [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort();
-  const planteles = [...new Set(datos.map(d => d.plantel).filter(Boolean))].sort();
-  const ccts      = [...new Set(datos.map(d => d.cct).filter(Boolean))].sort();
+  const colegios  = useMemo(() => [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort(), [datos]);
+  const planteles = useMemo(() => [...new Set(datos.map(d => d.plantel).filter(Boolean))].sort(), [datos]);
+  const ccts      = useMemo(() => [...new Set(datos.map(d => d.cct).filter(Boolean))].sort(), [datos]);
 
-  const datosFiltrados = datos.filter(d => {
+  const datosFiltrados = useMemo(() => datos.filter(d => {
     const okColegio  = !filtros.colegio  || d.colegio === filtros.colegio;
     const okPlantel  = !filtros.plantel  || d.plantel === filtros.plantel;
     const okCct      = !filtros.cct      || d.cct?.toLowerCase().includes(filtros.cct.toLowerCase());
     return okColegio && okPlantel && okCct;
-  });
+  }), [datos, filtros]);
 
   const hayFiltro = filtros.colegio || filtros.plantel || filtros.cct;
   const limpiar = () => setFiltros({ colegio: '', plantel: '', cct: '' });
   const set = (campo, val) => setFiltros(p => ({ ...p, [campo]: val }));
 
-  const plantelesFiltrados = filtros.colegio
-    ? [...new Set(datos.filter(d => d.colegio === filtros.colegio).map(d => d.plantel).filter(Boolean))].sort()
-    : planteles;
+  const plantelesFiltrados = useMemo(() =>
+    filtros.colegio
+      ? [...new Set(datos.filter(d => d.colegio === filtros.colegio).map(d => d.plantel).filter(Boolean))].sort()
+      : planteles
+  , [datos, filtros.colegio, planteles]);
 
   const { paginados, pagina, setPagina, totalPaginas, inicio } = usePaginacion(datosFiltrados);
 

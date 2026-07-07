@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { mapaService } from '../services/api';
 
 const IndicadoresNacionales = () => {
+  const navigate = useNavigate();
   const [datos, setDatos] = useState([]);
   const [colegio, setColegio] = useState('');
   const [loading, setLoading] = useState(true);
@@ -13,11 +15,11 @@ const IndicadoresNacionales = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const colegios = [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort();
+  const colegios = useMemo(() => [...new Set(datos.map(d => d.colegio).filter(Boolean))].sort(), [datos]);
 
-  const datosFiltrados = colegio
-    ? datos.filter(d => d.colegio === colegio)
-    : datos;
+  const datosFiltrados = useMemo(() =>
+    colegio ? datos.filter(d => d.colegio === colegio) : datos
+  , [datos, colegio]);
 
   if (loading) return <div className="loading">Cargando...</div>;
 
@@ -39,6 +41,8 @@ const IndicadoresNacionales = () => {
           {colegio && (
             <button className="tbl-clear-btn" onClick={() => setColegio('')}>✕ Limpiar</button>
           )}
+          <button className="grafica-link-btn" onClick={() => navigate('/graficas/eficiencia-terminal')}>📈 Eficiencia</button>
+          <button className="grafica-link-btn grafica-link-btn--secundario" onClick={() => navigate('/graficas/reprobacion-desafiliacion')}>⚠️ Riesgo</button>
         </div>
       </div>
 

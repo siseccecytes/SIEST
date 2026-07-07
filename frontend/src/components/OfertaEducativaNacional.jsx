@@ -1,4 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { mapaService } from '../services/api';
 
 const AutocompleteInput = ({ opciones, value, onChange, placeholder }) => {
@@ -36,6 +37,7 @@ const AutocompleteInput = ({ opciones, value, onChange, placeholder }) => {
 };
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081/api';
+const API = () => (import.meta.env.VITE_API_URL || 'http://localhost:8081/api').trim();
 
 const getColorFila = (modalidadPresencial) => {
   if (!modalidadPresencial) return '';
@@ -59,6 +61,7 @@ const leyenda = [
 ];
 
 const OfertaEducativaNacional = () => {
+  const navigate = useNavigate();
   const [datos, setDatos] = useState([]);
   const [filtros, setFiltros] = useState({ carrera: '' });
   const [loading, setLoading] = useState(true);
@@ -82,14 +85,14 @@ const OfertaEducativaNacional = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const carreras = [...new Set(datos.map(d => d.carreras).filter(Boolean))].sort();
+  const carreras = useMemo(() => [...new Set(datos.map(d => d.carreras).filter(Boolean))].sort(), [datos]);
 
-  const datosFiltrados = datos.filter(d =>
+  const datosFiltrados = useMemo(() => datos.filter(d =>
     !filtros.carrera || d.carreras?.toLowerCase().includes(filtros.carrera.toLowerCase())
-  );
+  ), [datos, filtros.carrera]);
 
   const abrirPdf = (carrera, tipo) => {
-    window.open(`${BASE}/oferta/pdf?carrera=${encodeURIComponent(carrera)}&tipo=${tipo}`, '_blank');
+    window.open(`${API()}/oferta/pdf?carrera=${encodeURIComponent(carrera)}&tipo=${tipo}`, '_blank');
   };
 
   if (loading) return <div className="loading">Cargando...</div>;
@@ -114,6 +117,7 @@ const OfertaEducativaNacional = () => {
           {filtros.carrera && (
             <button className="tbl-clear-btn" onClick={() => setFiltros({ carrera: '' })}>✕ Limpiar</button>
           )}
+          <button className="grafica-link-btn" onClick={() => navigate('/graficas/oferta-educativa')}>📊 Ver gráfica</button>
         </div>
       </div>
 

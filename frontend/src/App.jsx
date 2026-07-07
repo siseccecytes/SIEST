@@ -13,6 +13,17 @@ import DocentesPorPlantel from './components/DocentesPorPlantel';
 import OfertaEducativaNacional from './components/OfertaEducativaNacional';
 import OfertaEducativaPorPlantel from './components/OfertaEducativaPorPlantel';
 import ProgramaAnual from './components/ProgramaAnual';
+import GraficaMatriculaNacional from './components/graficas/GraficaMatriculaNacional';
+import GraficaMatriculaGenero from './components/graficas/GraficaMatriculaGenero';
+import GraficaEficienciaTerminal from './components/graficas/GraficaEficienciaTerminal';
+import GraficaReprobacionDesafiliacion from './components/graficas/GraficaReprobacionDesafiliacion';
+import GraficaDocentesPorEstado from './components/graficas/GraficaDocentesPorEstado';
+import GraficaHorasDocentes from './components/graficas/GraficaHorasDocentes';
+import GraficaTop10Planteles from './components/graficas/GraficaTop10Planteles';
+import GraficaOfertaEducativa from './components/graficas/GraficaOfertaEducativa';
+import GraficaRankingEstados from './components/graficas/GraficaRankingEstados';
+import GraficaMatriculaPlantel from './components/graficas/GraficaMatriculaPlantel';
+import DashboardIndicadores from './components/DashboardIndicadores';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -40,6 +51,20 @@ function App() {
         <Route path="/estadisticas/indicadores" element={<PrivateRoute><Layout><IndicadoresPorPlantel /></Layout></PrivateRoute>} />
         <Route path="/estadisticas/docentes-estado" element={<PrivateRoute><Layout><DocentesPorEstado /></Layout></PrivateRoute>} />
         <Route path="/estadisticas/docentes" element={<PrivateRoute><Layout><DocentesPorPlantel /></Layout></PrivateRoute>} />
+
+        {/* Gráficas */}
+        <Route path="/graficas/matricula-nacional" element={<PrivateRoute><Layout><GraficaMatriculaNacional /></Layout></PrivateRoute>} />
+        <Route path="/graficas/matricula-genero" element={<PrivateRoute><Layout><GraficaMatriculaGenero /></Layout></PrivateRoute>} />
+        <Route path="/graficas/eficiencia-terminal" element={<PrivateRoute><Layout><GraficaEficienciaTerminal /></Layout></PrivateRoute>} />
+        <Route path="/graficas/reprobacion-desafiliacion" element={<PrivateRoute><Layout><GraficaReprobacionDesafiliacion /></Layout></PrivateRoute>} />
+        <Route path="/graficas/docentes-estado" element={<PrivateRoute><Layout><GraficaDocentesPorEstado /></Layout></PrivateRoute>} />
+        <Route path="/graficas/horas-docentes" element={<PrivateRoute><Layout><GraficaHorasDocentes /></Layout></PrivateRoute>} />
+        <Route path="/graficas/top10-planteles" element={<PrivateRoute><Layout><GraficaTop10Planteles /></Layout></PrivateRoute>} />
+        <Route path="/graficas/oferta-educativa" element={<PrivateRoute><Layout><GraficaOfertaEducativa /></Layout></PrivateRoute>} />
+
+        <Route path="/graficas/ranking-estados" element={<PrivateRoute><Layout><GraficaRankingEstados /></Layout></PrivateRoute>} />
+        <Route path="/graficas/matricula-plantel" element={<PrivateRoute><Layout><GraficaMatriculaPlantel /></Layout></PrivateRoute>} />
+        <Route path="/dashboard/indicadores" element={<PrivateRoute><Layout><DashboardIndicadores /></Layout></PrivateRoute>} />
 
         {/* Anexos */}
         <Route path="/anexos/programa-anual" element={<PrivateRoute><Layout><ProgramaAnual /></Layout></PrivateRoute>} />
