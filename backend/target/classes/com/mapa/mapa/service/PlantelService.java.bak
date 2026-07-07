@@ -1,0 +1,57 @@
+package com.mapa.mapa.service;
+
+import com.mapa.mapa.dto.PlantelDTO;
+import com.mapa.mapa.entity.Plantel;
+import com.mapa.mapa.repository.PlantelRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class PlantelService {
+    private final PlantelRepository plantelRepository;
+    
+    public List<PlantelDTO> getPlantelsByEstado(Long estadoId) {
+        return plantelRepository.findByMunicipioEstadoId(estadoId).stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+    
+    public List<PlantelDTO> getPlantelsByMunicipio(Long municipioId) {
+        return plantelRepository.findByMunicipioId(municipioId).stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+    
+    public PlantelDTO getPlantelById(Long id) {
+        Plantel plantel = plantelRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Plantel no encontrado"));
+        return convertToDTO(plantel);
+    }
+    
+    public Plantel createPlantel(Plantel plantel) {
+        return plantelRepository.save(plantel);
+    }
+    
+    private PlantelDTO convertToDTO(Plantel plantel) {
+        PlantelDTO dto = new PlantelDTO();
+        dto.setId(plantel.getId());
+        dto.setNombre(plantel.getNombre());
+        dto.setClave(plantel.getClave());
+        dto.setLatitud(plantel.getLatitud());
+        dto.setLongitud(plantel.getLongitud());
+        dto.setDireccion(plantel.getDireccion());
+        dto.setTelefono(plantel.getTelefono());
+        dto.setEmail(plantel.getEmail());
+        dto.setDirector(plantel.getDirector());
+        dto.setTotalAlumnos(plantel.getTotalAlumnos());
+        dto.setTotalDocentes(plantel.getTotalDocentes());
+        dto.setTurno(plantel.getTurno());
+        dto.setImagenUrl(plantel.getImagenUrl());
+        dto.setMunicipioNombre(plantel.getMunicipio().getNombre());
+        dto.setEstadoNombre(plantel.getMunicipio().getEstado().getNombre());
+        return dto;
+    }
+}

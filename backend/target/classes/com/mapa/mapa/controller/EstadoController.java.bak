@@ -1,0 +1,26 @@
+package com.mapa.mapa.controller;
+
+import com.mapa.mapa.dto.EstadoDTO;
+import com.mapa.mapa.service.EstadoService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/estados")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class EstadoController {
+    private final EstadoService estadoService;
+    
+    @GetMapping
+    public ResponseEntity<List<EstadoDTO>> getAllEstados() {
+        return ResponseEntity.ok(estadoService.getAllEstados());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<EstadoDTO> getEstadoById(@PathVariable Long id) {
+        return ResponseEntity.ok(estadoService.getEstadoById(id));
+    }
+}
